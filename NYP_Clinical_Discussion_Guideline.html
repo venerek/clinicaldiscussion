@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinical Discussion Guideline</title>
+<style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --nyp-red: #E2231A; --nyp-gray: #E6E1E1;
+  --nyp-neutral-dark: #63666A; --nyp-neutral-light: #C8C9C7;
+  --nyp-neutral-extra-light: #D9D9D6;
+  --black: #000000; --gray-med: var(--nyp-neutral-light);
+  --gray-dark: var(--nyp-neutral-dark); --gray-text: #333333;
+  --text: #000000; --text-mid: #333333; --text-light: #555555;
+  --border: var(--nyp-neutral-light); --border-light: var(--nyp-neutral-extra-light);
+  --bg: var(--nyp-gray); --bg-alt: var(--nyp-gray); --bg-tint: #FFFFFF;
+  --surface: #FFFFFF; --w-light: 400; --cover-sub: #333333; --cover-note: #333333;
+  --font: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+}
+html.present {
+  font-size: clamp(18px, 1.4vw, 34px);
+  --text-mid: #222222; --text-light: #444444; --border: #97999B;
+  --cover-sub: #222222; --cover-note: #333333;
+}
+body { font-family: var(--font); background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; width: 100%; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+.site-header { position: fixed; top: 0; left: 0; right: 0; height: 2.5rem; background: #000; border-bottom: 1px solid var(--nyp-neutral-dark); display: flex; align-items: center; padding: 0 1.5rem; z-index: 100; gap: 1rem; }
+.site-header .doc-title { font-size: .625rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--nyp-gray); }
+.site-header .sep { color: var(--nyp-neutral-light); font-size: .75rem; }
+.site-header .current-section { font-size: .75rem; color: #fff; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.site-header .progress { margin-left: auto; font-size: .6875rem; color: var(--nyp-gray); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.hdr-btn { font-family: var(--font); font-size: .5625rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #fff; background: none; border: 1px solid var(--nyp-neutral-dark); padding: .3rem .65rem; cursor: pointer; flex-shrink: 0; }
+.hdr-btn:hover, .hdr-btn.on { color: #fff; border-color: #fff; }
+.notes-btn { display: none; }
+html.present .notes-btn { display: inline-block; }
+.layout { display: flex; height: 100vh; padding-top: 2.5rem; }
+.sidebar { width: 12.25rem; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border-light); overflow-y: auto; padding: 1rem 0; }
+.sidebar::-webkit-scrollbar { display: none; }
+.sidebar-group-label { font-size: .5625rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text-light); padding: .5rem 1.1rem; }
+.sidebar-item { display: flex; align-items: center; gap: .625rem; padding: .4rem 1.1rem; cursor: pointer; border-left: 2px solid transparent; text-decoration: none; transition: background .1s; }
+.sidebar-item:hover { background: var(--nyp-gray); }
+.sidebar-item.active { border-left-color: var(--nyp-red); background: var(--nyp-gray); }
+.sidebar-item .s-num { font-size: .5625rem; font-weight: 700; color: var(--text-light); width: 1rem; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.sidebar-item .s-title { font-size: .6875rem; color: var(--text-mid); line-height: 1.3; }
+.sidebar-item.active .s-num, .sidebar-item.active .s-title { color: #000; font-weight: 700; }
+html.present .sidebar { display: none; }
+.scroll-container { position: relative; flex: 1; min-width: 0; overflow-y: scroll; scroll-snap-type: y mandatory; height: calc(100vh - 2.5rem); }
+.scroll-container::-webkit-scrollbar { display: none; }
+.section { scroll-snap-align: start; scroll-snap-stop: always; min-height: calc(100vh - 2.5rem); display: flex; flex-direction: column; padding: 2.5rem 3rem 1.75rem; background: var(--surface); border-bottom: 1px solid var(--border-light); }
+.sec-meta { display: flex; align-items: center; gap: 1.25rem; padding-bottom: .6rem; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; }
+.sec-num { font-size: .5625rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-light); }
+.sec-category { font-size: .5625rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #000; }
+.sec-title { font-family: var(--font); font-size: 1.5rem; font-weight: 700; letter-spacing: -.025em; line-height: 1.2; color: var(--text); margin-bottom: 1.25rem; }
+.sec-note { font-size: .75rem; font-weight: 400; color: var(--text-mid); line-height: 1.6; margin-bottom: 1.25rem; max-width: 40rem; border-left: 2px solid var(--nyp-red); padding-left: .875rem; }
+.field-table { width: 100%; margin-bottom: 1.25rem; }
+.field-row { display: grid; grid-template-columns: 10rem 1fr; gap: 1.5rem; padding: .55rem 0; border-bottom: 1px solid var(--border-light); align-items: baseline; }
+.field-row:first-child { border-top: 1px solid var(--border); }
+.field-label { font-size: .625rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-light); }
+.field-value { font-size: .78rem; color: var(--text); line-height: 1.55; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-bottom: 1.25rem; }
+.col-label { font-size: .5625rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-light); margin-bottom: .6rem; padding-bottom: .35rem; border-bottom: 1px solid var(--border); }
+.item-list { list-style: none; }
+.item-list li { display: flex; gap: .75rem; padding: .38rem 0; border-bottom: 1px solid var(--border-light); font-size: .75rem; line-height: 1.55; color: var(--text); }
+.item-list li:last-child { border-bottom: none; }
+.item-list li::before { content: "\2014"; color: var(--gray-med); flex-shrink: 0; font-size: .6875rem; margin-top: 1px; }
+.item-list.italic li { font-style: italic; color: var(--text-mid); }
+.step-grid, .icf-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); border-top: 1px solid var(--border); border-left: 1px solid var(--border); margin-bottom: 1.25rem; }
+.three-grid, .mod-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); border-top: 1px solid var(--border); border-left: 1px solid var(--border); margin-bottom: 1.25rem; }
+.three-grid.ctx .three-box { padding: 1rem 1.1rem .5rem; }
+.three-grid.ctx .step-label { margin-bottom: .5rem; }
+.step-box, .three-box, .icf-cell { padding: .75rem .875rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface); }
+.step-label, .icf-label, .mod-label { font-size: .5625rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #000; margin-bottom: .35rem; }
+.step-body, .icf-body { font-size: .72rem; color: var(--text-mid); line-height: 1.5; font-weight: 400; }
+.mod-cell { padding: 1rem 1.1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); background: #fff; }
+.mod-val { font-size: .8125rem; font-weight: 700; color: var(--text); margin-bottom: .5rem; }
+.mod-rationale { font-size: .72rem; font-weight: 400; color: var(--text-mid); line-height: 1.55; }
+html.present .step-grid, html.present .icf-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.domain-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border); border-left: 1px solid var(--border); margin-bottom: 1.25rem; }
+.domain-cell { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface); min-width: 0; }
+.domain-head { width: 100%; text-align: left; font-family: var(--font); color: inherit; border: none; background: transparent; padding: .75rem .875rem; display: flex; align-items: center; justify-content: space-between; gap: .75rem; cursor: pointer; }
+.domain-head:hover { background: var(--nyp-gray); }
+.domain-cell.open .domain-head { box-shadow: inset 3px 0 0 var(--nyp-red); }
+.domain-left { flex: 1; min-width: 0; }
+.domain-name { display: block; font-size: .5625rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #000; margin-bottom: .3rem; }
+.domain-desc { display: block; font-size: .72rem; color: var(--text-mid); line-height: 1.45; font-weight: 400; }
+.domain-chevron { width: .875rem; height: .875rem; flex-shrink: 0; color: var(--nyp-neutral-dark); transition: transform .18s; }
+.domain-cell.open .domain-chevron { transform: rotate(180deg); }
+.domain-expand { display: none; border-top: 1px solid var(--border-light); padding: .875rem; background: #fff; }
+.domain-cell.open .domain-expand { display: block; }
+.dtype { display: inline-block; font-size: .5rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #000; border: 1px solid var(--nyp-neutral-dark); padding: .15rem .45rem; margin-bottom: .65rem; }
+.expand-section-label { font-size: .5625rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #000; margin-bottom: .3rem; }
+.expand-q { font-size: .75rem; color: var(--text-mid); line-height: 1.55; margin-bottom: .75rem; padding-bottom: .65rem; border-bottom: 1px solid var(--border-light); font-style: italic; }
+.expand-body-label { font-size: .5625rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--text-light); margin: .65rem 0 .3rem; }
+.vignette { font-size: .72rem; color: var(--text); line-height: 1.6; font-weight: 400; }
+.pitfall-text { font-size: .72rem; color: var(--text-mid); line-height: 1.5; font-weight: 400; font-style: italic; }
+html.present .domain-chevron { transform: rotate(-90deg); }
+.overlay { position: fixed; top: 2.5rem; left: 0; right: 0; bottom: 0; background: var(--surface); z-index: 110; padding: 2.5rem 3rem 1.75rem; overflow-y: auto; display: flex; flex-direction: column; }
+.overlay[hidden] { display: none; }
+.ov-top { display: flex; align-items: center; justify-content: space-between; padding-bottom: .6rem; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; }
+.ov-count { font-size: .5625rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-light); }
+.ov-count b { color: #000; font-weight: 700; margin-left: 1.25rem; }
+.ov-close { font-family: var(--font); font-size: .5625rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid); background: none; border: 1px solid var(--border); padding: .3rem .7rem; cursor: pointer; }
+.ov-close:hover { color: #000; border-color: #000; }
+.ov-name { font-family: var(--font); font-size: 1.5rem; font-weight: 700; letter-spacing: -.025em; line-height: 1.2; color: var(--text); margin-bottom: .35rem; }
+.ov-desc { font-size: .78rem; color: var(--text-mid); margin-bottom: 1.25rem; }
+.ov-q { font-size: .9rem; font-style: italic; color: var(--text); line-height: 1.55; border-left: 2px solid var(--nyp-red); padding-left: .875rem; margin-bottom: 1.5rem; max-width: 48rem; }
+.ov-row { display: grid; grid-template-columns: 10rem 1fr; gap: 1.5rem; padding: .75rem 0; border-bottom: 1px solid var(--border-light); align-items: baseline; }
+.ov-row:first-of-type { border-top: 1px solid var(--border); }
+.ov-label { font-size: .625rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-light); }
+.ov-val { font-size: .8125rem; line-height: 1.6; color: var(--text); max-width: 54rem; }
+.ov-val.pit { font-style: italic; color: var(--text-mid); }
+.ov-hint { margin-top: auto; padding-top: 1.25rem; font-size: .5625rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text-light); }
+.tl { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
+.tl-rail { grid-column: 1 / -1; height: 2px; background: var(--border); margin: .35rem 0 1rem; position: relative; }
+.tl-rail span { position: absolute; top: -.3rem; width: .625rem; height: .625rem; border-radius: 50%; background: var(--surface); border: 2px solid var(--nyp-red); }
+.tl-stage { padding-right: 1rem; }
+.tl-stage + .tl-stage { padding-left: 1rem; border-left: 1px solid var(--border-light); }
+.tl-q { font-size: .75rem; line-height: 1.55; color: var(--text); padding: .4rem 0; border-bottom: 1px solid var(--border-light); }
+.tl-q:last-child { border-bottom: none; }
+.tl-band { margin: 1.25rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: .6rem 0; display: grid; grid-template-columns: 10rem 1fr; gap: 1.5rem; align-items: baseline; }
+.tl-band .step-label { margin: 0; }
+.tl-band .tl-q { border: none; padding: 0; }
+.cmp-wrap { overflow-x: auto; margin-bottom: 1.25rem; }
+.cmp { display: grid; grid-template-columns: 8rem 1fr 1fr 1.3fr; border-top: 1px solid var(--border); border-left: 1px solid var(--border); min-width: 36rem; }
+.cmp > div { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: .6rem .75rem; font-size: .72rem; line-height: 1.45; }
+.cmp .cmp-h { font-size: .5625rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #000; background: var(--nyp-gray); }
+.cmp .cmp-r { font-size: .5625rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-light); background: var(--nyp-gray); }
+.cmp .cmp-hint { color: #555; font-style: italic; font-weight: 400; }
+.cmp.three { grid-template-columns: 9rem 1fr 1.5fr; min-width: 30rem; }
+.cmp.three .cmp-weak, .cmp.three .cmp-strong { font-size: .78rem; line-height: 1.55; padding: .75rem .85rem; }
+.cmp .cmp-weak { color: var(--text-mid); }
+.cmp .cmp-strong { color: var(--text); }
+.cmp .cmp-h.dim { color: var(--text-light); }
+.refl { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); border-top: 1px solid var(--border); margin-bottom: 1.25rem; }
+.refl > div { padding: .65rem 1rem 0 0; font-size: .75rem; line-height: 1.5; color: var(--text); }
+.refl > div + div { padding-left: 1rem; border-left: 1px solid var(--border-light); }
+.pil { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); border-top: 2px solid var(--nyp-red); margin-bottom: 1.25rem; }
+.pil > div { padding: .75rem 1rem .25rem 0; }
+.pil > div + div { padding-left: 1rem; border-left: 1px solid var(--border-light); }
+.pil-q { font-size: .75rem; line-height: 1.55; color: var(--text); }
+.gapband { display: grid; grid-template-columns: auto 1fr auto; gap: 1.5rem; align-items: center; border: 1px solid var(--border); padding: .75rem 1rem; margin-bottom: 1.25rem; }
+.gap-end { font-size: .5625rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--text-light); white-space: nowrap; }
+.gap-mid { text-align: center; font-size: .78rem; line-height: 1.5; color: var(--text); }
+.gap-mid small { display: block; font-size: .6875rem; color: var(--text-mid); margin-top: .2rem; font-weight: 400; }
+html.present .section:not(.cover) { justify-content: center; }
+html.present .sec-title { font-size: 2.1rem; margin-bottom: 1.4rem; }
+html.present .sec-num, html.present .sec-category { font-size: .72rem; }
+html.present .sec-note { font-size: .98rem; max-width: 52rem; }
+html.present .step-label, html.present .icf-label, html.present .mod-label, html.present .domain-name,
+html.present .field-label, html.present .col-label, html.present .cmp .cmp-h, html.present .cmp .cmp-r,
+html.present .expand-section-label, html.present .ov-label, html.present .ov-count, html.present .gap-end,
+html.present .refs-block-label { font-size: .74rem; }
+html.present .step-body, html.present .icf-body, html.present .mod-rationale, html.present .tl-q,
+html.present .pil-q, html.present .refl > div, html.present .item-list li, html.present .cmp > div,
+html.present .domain-desc, html.present .vignette, html.present .pitfall-text, html.present .gap-mid { font-size: .98rem; line-height: 1.45; }
+html.present .gap-mid small { font-size: .85rem; }
+html.present .field-value { font-size: 1rem; line-height: 1.45; }
+html.present .field-row, html.present .ov-row, html.present .tl-band { grid-template-columns: 13rem 1fr; }
+html.present .cmp.three .cmp-weak, html.present .cmp.three .cmp-strong { font-size: 1rem; }
+html.present .mod-val { font-size: 1.2rem; }
+html.present .item-list li::before { font-size: .9rem; }
+html.present .ov-name { font-size: 2.1rem; }
+html.present .ov-desc { font-size: 1.05rem; margin-bottom: 1rem; }
+html.present .ov-q { font-size: 1.3rem; max-width: 60rem; margin-bottom: .9rem; }
+html.present .ov-val { font-size: 1.06rem; max-width: 62rem; line-height: 1.5; }
+html.present .dtype { font-size: .65rem; }
+html.present .ov-hint, html.present .ov-close { font-size: .7rem; }
+html.present .cover .cover-eyebrow { font-size: .95rem; }
+html.present .cover .sec-title { font-size: 3.75rem; }
+html.present .cover .cover-sub { font-size: 1.15rem; max-width: 50rem; }
+html.present .cover .framing-note { font-size: 1.05rem; max-width: 46rem; }
+html.present .section { padding: 2rem 3rem 1.5rem; }
+html.present .overlay { padding: 1.25rem 3rem .75rem; }
+html.present .ov-row { padding: .6rem 0; }
+html.present .ov-hint { padding-top: .4rem; }
+html.present .three-grid.ctx .item-list li { font-size: 1.1rem; padding: .5rem 0; }
+html.present .three-grid.ctx .three-box { padding: 1.25rem 1.4rem .75rem; }
+.cite { font-size: .625rem; color: var(--text-light); font-style: italic; margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border-light); }
+html.present .fac, html.present .cite { display: none; }
+html.present.show-notes .fac, html.present.show-notes .cite { display: block; }
+html.present [data-spotlight] .spot { cursor: pointer; transition: opacity .2s; }
+html.present .spotting .spot { opacity: .22; }
+html.present .spotting .spot.lit { opacity: 1; }
+html.present .spot.lit::before, html.present .field-row.spot.lit .field-label { color: #000; }
+html.present .field-row.spot.lit { box-shadow: inset 3px 0 0 var(--nyp-red); padding-left: .75rem; }
+.section.cover { background: var(--nyp-gray); justify-content: center; padding: 3rem 3.5rem; }
+.cover .cover-eyebrow { font-size: .75rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #000; margin-bottom: 1.1rem; }
+.cover .cover-rule { width: 3rem; height: 3px; background: var(--nyp-red); border: none; margin-bottom: 1rem; }
+.cover .sec-title { font-size: 2.75rem; color: #000; line-height: 1.1; margin-bottom: 0; letter-spacing: -.035em; }
+.cover .cover-title-accent { color: #000; }
+.cover .cover-sub { font-size: .8125rem; font-weight: 400; color: var(--cover-sub); max-width: 40rem; text-wrap: balance; line-height: 1.65; margin-top: 1.25rem; }
+.cover .cover-divider { border: none; border-top: 1px solid var(--nyp-neutral-light); margin: 1.75rem 0; width: 100%; }
+.cover .framing-note b { font-weight: 700; color: #000; }
+.cover .framing-note { font-size: .75rem; font-weight: 400; color: var(--cover-note); border-left: 2px solid var(--nyp-red); padding-left: .875rem; line-height: 1.65; max-width: 36rem; }
+.section.refs { background: var(--nyp-gray); }
+html.present .section.refs { display: none; }
+.refs-block { margin-bottom: 1.25rem; }
+.refs-block-label { font-size: .5625rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #000; margin-bottom: .4rem; padding-bottom: .35rem; border-bottom: 1px solid var(--border); }
+.ref-list { list-style: none; }
+.ref-list li { font-size: .6875rem; color: var(--text-mid); line-height: 1.55; font-weight: 400; padding: .2rem 0 .2rem 1.5rem; text-indent: -1.5rem; }
+.ref-list li span { display: inline-block; width: 1.5rem; text-indent: 0; color: var(--text-light); font-variant-numeric: tabular-nums; }
+.toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #000; color: #fff; font-size: .625rem; letter-spacing: .04em; padding: .6rem 1rem; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 200; max-width: calc(100vw - 2rem); text-align: center; }
+.toast.show { opacity: 1; }
+@media (max-width: 900px) {
+  html:not(.present) .sidebar { display: none; }
+  .step-grid, .icf-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .two-col, .three-grid, .mod-grid, .domain-grid, .tl, .pil, .refl { grid-template-columns: 1fr; }
+  .tl-stage + .tl-stage, .pil > div + div, .refl > div + div { border-left: none; padding-left: 0; }
+  .tl-rail { display: none; }
+  .section { padding: 2rem 1.5rem 1.5rem; }
+}
+@media (max-width: 600px) {
+  .site-header { padding: 0 .65rem; gap: .5rem; }
+  .site-header .doc-title, .site-header .sep { display: none; }
+  .section.cover { padding: 2rem 1.5rem; }
+  .field-row, .ov-row, .tl-band,
+  html.present .field-row, html.present .ov-row, html.present .tl-band { grid-template-columns: 1fr; gap: .35rem; }
+  .gapband { grid-template-columns: 1fr; gap: .65rem; }
+  .gap-end { text-align: center; }
+  .overlay, html.present .overlay { padding: 1.25rem 1.5rem; }
+  html.present .section { padding: 2rem 1.5rem 1.5rem; }
+  html.present .cover .sec-title { font-size: 2.75rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
+}
+
+</style>
+</head>
+<body>
+<header class="site-header">
+<span class="doc-title">Acute Care PT</span><span class="sep" aria-hidden="true">&#8212;</span>
+<span class="current-section" id="headerTitle">Clinical Discussion Guideline</span>
+<span class="progress" id="headerProgress"></span>
+<button type="button" class="hdr-btn notes-btn" id="notesBtn" aria-pressed="false" title="Show or hide facilitator notes (N)">Notes</button>
+<button type="button" class="hdr-btn" id="modeBtn" aria-pressed="false" title="Toggle presentation mode (P)">Present</button>
+</header>
+<div class="layout">
+<nav class="sidebar" aria-label="Section navigation">
+<div class="sidebar-group-label">Contents</div>
+<a class="sidebar-item active" data-nav="0" href="#s0"><span class="s-num">&#8212;</span><span class="s-title">Cover</span></a>
+<a class="sidebar-item" data-nav="1" href="#s1"><span class="s-num">01</span><span class="s-title">Case selection</span></a>
+<a class="sidebar-item" data-nav="2" href="#s2"><span class="s-num">02</span><span class="s-title">Opening</span></a>
+<a class="sidebar-item" data-nav="3" href="#s3"><span class="s-num">03</span><span class="s-title">Patient context</span></a>
+<a class="sidebar-item" data-nav="4" href="#s4"><span class="s-num">04</span><span class="s-title">Reasoning domains</span></a>
+<a class="sidebar-item" data-nav="5" href="#s5"><span class="s-num">05</span><span class="s-title">Complexity</span></a>
+<a class="sidebar-item" data-nav="6" href="#s6"><span class="s-num">06</span><span class="s-title">Plan of care</span></a>
+<a class="sidebar-item" data-nav="7" href="#s7"><span class="s-num">07</span><span class="s-title">Outcome review</span></a>
+<a class="sidebar-item" data-nav="8" href="#s8"><span class="s-num">08</span><span class="s-title">Evidence</span></a>
+<a class="sidebar-item" data-nav="9" href="#s9"><span class="s-num">09</span><span class="s-title">Moderator prompts</span></a>
+<a class="sidebar-item" data-nav="10" href="#s10"><span class="s-num">10</span><span class="s-title">Closing</span></a>
+<a class="sidebar-item" data-nav="11" href="#s11"><span class="s-num">&#8212;</span><span class="s-title">References</span></a>
+</nav>
+<main class="scroll-container" id="scrollContainer">
+<section class="section cover" id="s0" data-nav="0" data-title="Clinical Discussion Guideline">
+<div class="cover-eyebrow">Acute Care Physical Therapy</div><hr class="cover-rule">
+<div class="sec-title">Clinical Discussion<br><span class="cover-title-accent">Guideline</span></div>
+<div class="cover-sub">A framework for peer case discussion, centered on clinical reasoning and decision-making in acute care</div>
+<hr class="cover-divider"><div class="framing-note">Center the session on one or two clinical reasoning domains and explore them fully. <b>Depth matters more than coverage.</b></div></section>
+
+<section class="section " id="s1" data-nav="1" data-title="Case selection &amp; preparation"><div class="sec-meta"><span class="sec-num">Section 01</span><span class="sec-category">Preparation</span></div><div class="sec-title">Case selection &amp; preparation</div><p class="sec-note">Cases need not involve adverse events; complex and exemplary cases are often equally instructive.</p><div class="step-grid"><div class="step-box"><div class="step-label">Complex reasoning</div><div class="step-body">Atypical presentations, diagnostic uncertainty, or competing comorbidities</div></div><div class="step-box"><div class="step-label">Clinical decision points</div><div class="step-body">Unexpected trajectories, escalation or de-escalation decisions, or major changes to the plan of care</div></div><div class="step-box"><div class="step-label">Exemplary practice</div><div class="step-body">Strong therapeutic alliance, creative problem-solving, or effective interprofessional collaboration</div></div><div class="step-box"><div class="step-label">Safety events &amp; near misses</div><div class="step-body">Adverse events, near misses, or unexpected outcomes with system-level lessons</div></div></div><div class="field-table"><div class="field-row"><span class="field-label">Data</span><span class="field-value">De-identify all patient information before the session</span></div><div class="field-row"><span class="field-label">Roles</span><span class="field-value">Assign a presenter and, if helpful, a content expert; circulate key literature in advance</span></div><div class="field-row"><span class="field-label">Purpose</span><span class="field-value">Decide the session's purpose in advance: learning, quality improvement, or peer review</span></div><div class="field-row"><span class="field-label">Timing</span><span class="field-value">A 30-minute session might allow about 3 minutes to open, 10 to present, 12 to discuss, and 5 to close</span></div></div><div class="cite">Giesbrecht &amp; Au, Jt Comm J Qual Patient Saf 2016 · Brook et al., J Patient Saf 2024</div></section>
+
+<section class="section " id="s2" data-nav="2" data-title="Opening the discussion"><div class="sec-meta"><span class="sec-num">Section 02</span><span class="sec-category">Facilitation</span></div><div class="sec-title">Opening the discussion</div><p class="sec-note fac">The opening sets the tone. These three moves take a minute or two and make candid discussion possible.</p><div class="mod-grid"><div class="mod-cell"><div class="mod-label">Establish</div><div class="mod-val">Confidentiality &amp; psychological safety</div><div class="mod-rationale fac">State it explicitly before the case begins. Clinicians are unlikely to share uncertainty, error, or disagreement unless it is clearly safe to do so. One sentence is enough, but it must be said.</div></div><div class="mod-cell"><div class="mod-label">Reframe toward Safety-II</div><div class="mod-val">Start with what went well</div><div class="mod-rationale fac">Safety-II examines how care usually succeeds, not only how it fails. Starting here shifts the group from defensive to curious and surfaces expertise that often goes unrecognized.</div></div><div class="mod-cell"><div class="mod-label">Name the purpose</div><div class="mod-val">Learning, quality improvement, or peer review</div><div class="mod-rationale fac">Naming the purpose tells participants how the discussion will be used, which shapes how candid they can be.</div></div></div><div class="cite">Edmondson, Adm Sci Q 1999 · Hollnagel, Wears &amp; Braithwaite 2015 · Brook et al., J Patient Saf 2024</div></section>
+
+<section class="section " id="s3" data-nav="3" data-title="Patient &amp; clinical context"><div class="sec-meta"><span class="sec-num">Section 03</span><span class="sec-category">Presentation</span></div><div class="sec-title">Patient &amp; clinical context</div><div class="three-grid ctx"><div class="three-box"><div class="step-label">Admission &amp; referral</div><ul class="item-list"><li>Admitting diagnosis</li><li>Reason for PT referral</li><li>Comorbidities</li><li>Precautions and contraindications</li></ul></div><div class="three-box"><div class="step-label">Hospital course</div><ul class="item-list"><li>Procedures</li><li>Complications</li><li>Medications affecting function</li><li>Illness trajectory</li></ul></div><div class="three-box"><div class="step-label">Baseline</div><ul class="item-list"><li>Prior level of function</li><li>Living situation</li><li>Social support</li><li>Valued roles</li></ul></div></div><div class="tl-band"><div class="step-label">One-line summary</div><div class="tl-q">Open with a single sentence: who the patient is, why they were admitted, and why this case was chosen.</div></div><div class="cite">APTA Guide to Physical Therapist Practice 4.0, 2023</div></section>
+
+<section class="section " id="s3b" data-nav="3" data-title="ICF examination snapshot"><div class="sec-meta"><span class="sec-num">Section 03 &#8212; continued</span><span class="sec-category">Presentation</span></div><div class="sec-title">ICF examination snapshot</div><p class="sec-note">Consider findings across all ICF components; each informs the others.</p><div class="icf-grid"><div class="icf-cell"><div class="icf-label">Body functions &amp; structures</div><div class="icf-body">Strength, ROM, cardiopulmonary status, tone, cognition, pain, relevant labs and vitals</div></div><div class="icf-cell"><div class="icf-label">Activities</div><div class="icf-body">Bed mobility, transfers, gait, stairs; validated measures for the population and context</div></div><div class="icf-cell"><div class="icf-label">Participation</div><div class="icf-body">Life roles and community participation the patient aims to resume</div></div><div class="icf-cell"><div class="icf-label">Contextual factors</div><div class="icf-body">Environmental (home setup, caregiver capacity, discharge options) and personal (values, priorities, coping)</div></div></div><div class="cite">WHO ICF 2001 · Atkinson &amp; Nixon-Cave, Phys Ther 2011 · Davenport, Physiother Res Int 2015</div></section>
+
+<section class="section " id="s4" data-nav="4" data-title="Clinical reasoning domains"><div class="sec-meta"><span class="sec-num">Section 04</span><span class="sec-category">Core focus</span></div><div class="sec-title">Clinical reasoning domains</div><p class="sec-note">Choose one or two domains most relevant to the case. Select a domain to view its vignette, labeled as an exemplar, a missed opportunity, or an open case.</p><div class="domain-grid" id="domainGrid"></div><div class="cite">Edwards et al., Phys Ther 2004 (interactive reasoning adapted to include interprofessional communication) · Edwards, Braunack-Mayer &amp; Jones, Physiotherapy 2005 · Jensen et al., Phys Ther 2000 · Huhn et al., Phys Ther 2019</div></section>
+
+<section class="section " id="s5" data-nav="5" data-title="Navigating complexity &amp; uncertainty" data-spotlight><div class="sec-meta"><span class="sec-num">Section 05</span><span class="sec-category">Complexity</span></div><div class="sec-title">Navigating complexity &amp; uncertainty</div><p class="sec-note">Acute care practice involves ill-structured problems, incomplete information, and evolving clinical pictures.</p><div class="field-table"><div class="field-row spot"><span class="field-label">Ambiguity</span><span class="field-value">When was the clinical picture most ambiguous, and how did you manage the uncertainty?</span></div><div class="field-row spot"><span class="field-label">Competing priorities</span><span class="field-value">How did you weigh competing priorities, such as medical stability versus early mobilization, or patient preference versus clinical risk?</span></div><div class="field-row spot"><span class="field-label">New information</span><span class="field-value">How did new information (labs, imaging, surgical updates) change your reasoning?</span></div><div class="field-row spot"><span class="field-label">Pattern recognition</span><span class="field-value">Where did pattern recognition help, and where might it have led to bias or premature closure?</span></div><div class="field-row spot"><span class="field-label">Constraints</span><span class="field-value">Which constraints (staffing, time, equipment, discharge options) shaped your decisions, and how did you work within them?</span></div><div class="field-row spot"><span class="field-label">Thinking mode</span><span class="field-value">When did you rely on fast, intuitive judgment versus slow, deliberate analysis, and was each appropriate?</span></div></div><div class="cite">Smith, Higgs &amp; Ellis, Physiother Res Int 2008 · Croskerry, Acad Med 2009 · Huhn et al., Phys Ther 2019</div></section>
+
+<section class="section " id="s6" data-nav="6" data-title="Plan of care" data-spotlight><div class="sec-meta"><span class="sec-num">Section 06</span><span class="sec-category">Treatment</span></div><div class="sec-title">Plan of care</div><p class="sec-note">Prompts follow the episode of care; discharge planning runs throughout.</p><div class="tl"><div class="tl-rail"><span style="left:0"></span><span style="left:calc(33.33% - .3125rem)"></span><span style="left:calc(66.66% - .3125rem)"></span><span style="right:0"></span></div><div class="tl-stage"><div class="step-label">Evaluation</div><div class="tl-q spot">Which examination findings informed your prognosis and plan of care, and which carried the most weight?</div><div class="tl-q spot">How were problems prioritized, and which were deferred to the next level of care?</div></div><div class="tl-stage"><div class="step-label">Early sessions</div><div class="tl-q spot">What interventions were selected, and what evidence supported them?</div><div class="tl-q spot">How were dose, intensity, and progression set?</div></div><div class="tl-stage"><div class="step-label">Ongoing</div><div class="tl-q spot">Where did the plan change in real time, and what prompted it?</div><div class="tl-q spot">How was patient and caregiver education built in, and how was learning confirmed?</div></div></div><div class="tl-band"><div class="step-label">Throughout</div><div class="tl-q spot">When did discharge planning begin, and what shaped the recommended disposition?</div></div></section>
+
+<section class="section " id="s7" data-nav="7" data-title="Outcome review"><div class="sec-meta"><span class="sec-num">Section 07</span><span class="sec-category">Review</span></div><div class="sec-title">Outcome review</div><p class="sec-note">Compare what was anticipated with what happened, then reflect on why.</p><div class="cmp-wrap"><div class="cmp"><div class="cmp-h"></div><div class="cmp-h">Anticipated</div><div class="cmp-h">Actual</div><div class="cmp-h">What explains the gap?</div><div class="cmp-r">Function</div><div class="cmp-hint">Expected status at discharge</div><div class="cmp-hint">Outcome measures at discharge</div><div class="cmp-hint">Patient, system, or reasoning factors</div><div class="cmp-r">Disposition</div><div class="cmp-hint">Initial recommendation</div><div class="cmp-hint">Actual discharge destination</div><div class="cmp-hint">When and why the plan shifted</div></div></div><div class="refl"><div class=""><div class="step-label">Went well</div>What worked, and why?</div><div class=""><div class="step-label">Reasoning</div>What did this case reveal about your reasoning?</div><div class=""><div class="step-label">Safety</div>Were there adverse events or near misses? What system and individual factors contributed?</div></div></section>
+
+<section class="section " id="s8" data-nav="8" data-title="Evidence integration"><div class="sec-meta"><span class="sec-num">Section 08</span><span class="sec-category">Evidence</span></div><div class="sec-title">Evidence integration</div><div class="pil"><div class=""><div class="step-label">Research evidence</div><div class="pil-q">What does current evidence say? Were relevant guidelines followed, and if not, why?</div></div><div class=""><div class="step-label">Clinical expertise</div><div class="pil-q">How did experience and judgment shape how the evidence was applied?</div></div><div class=""><div class="step-label">Patient values</div><div class="pil-q">How did the patient's preferences shape the choice?</div></div></div><div class="gapband"><span class="gap-end">Local practice</span><div class="gap-mid">Where do local practice and best evidence differ, and what is the actionable lesson?<small>Note where local constraints intervened.</small></div><span class="gap-end">Best evidence</span></div><div class="cite">Sackett et al., BMJ 1996 · APTA Guide to Physical Therapist Practice 4.0, 2023</div></section>
+
+<section class="section " id="s9" data-nav="9" data-title="Moderator prompts" data-spotlight><div class="sec-meta"><span class="sec-num">Section 09</span><span class="sec-category">Discussion</span></div><div class="sec-title">Moderator prompts</div><p class="sec-note">A designated moderator is optional. If the group chooses one, ideally it is a content expert in the case's clinical area, who can ask informed follow-up questions. The prompts below work with or without one.</p><div class="two-col"><div class=""><div class="col-label">Clinical reasoning</div><ul class="item-list italic"><li class="spot">“Walk us through your thinking at the point you were most uncertain.”</li><li class="spot">“What would have changed your approach, and why?”</li><li class="spot">“Where did your reasoning shift, and what prompted it?”</li></ul></div><div class=""><div class="col-label">Complexity &amp; systems</div><ul class="item-list italic"><li class="spot">“Is this a recurring pattern in this patient population?”</li><li class="spot">“What does this case reveal about how we communicate as a team?”</li><li class="spot">“What would need to change in practice, workflow, or knowledge to handle a similar case better?”</li><li class="spot">“What would you tell a newer colleague about this type of case?”</li></ul></div></div><div class="cite">Giesbrecht &amp; Au, Jt Comm J Qual Patient Saf 2016 · Brook et al., J Patient Saf 2024 · Lai et al., Fam Pract Manag 2023</div></section>
+
+<section class="section " id="s10" data-nav="10" data-title="Closing &amp; action items"><div class="sec-meta"><span class="sec-num">Section 10</span><span class="sec-category">Close</span></div><div class="sec-title">Closing &amp; action items</div><p class="sec-note">A good close is brief and concrete: two named lessons and one assigned action is a strong outcome for a single session.</p><div class="three-grid"><div class="three-box"><div class="step-label">Synthesize learning</div><div class="step-body">Name one reasoning lesson and one systems lesson before closing</div></div><div class="three-box"><div class="step-label">Assign actions</div><div class="step-body">An owner, a specific task, and a deadline</div></div><div class="three-box"><div class="step-label">Document &amp; track</div><div class="step-body">Record outcomes, review progress at the next session, and link to department quality metrics where relevant</div></div></div><div class="cite">Brook et al., J Patient Saf 2024 · Lai et al., Fam Pract Manag 2023</div></section>
+
+<section class="section " id="s10b" data-nav="10" data-title="Weaker and stronger closes"><div class="sec-meta"><span class="sec-num">Section 10 &#8212; continued</span><span class="sec-category">Close</span></div><div class="sec-title">Weaker and stronger closes</div><p class="sec-note">Illustrated with a missed-opportunity version of the predictive vignette, in which the recommendation stays home until the score reaches 13.</p><div class="cmp-wrap"><div class="cmp three"><div class="cmp-h"></div><div class="cmp-h dim">Weaker</div><div class="cmp-h">Stronger</div><div class="cmp-r">Reasoning lesson</div><div class="cmp-weak">“We should reassess discharge plans more often.”</div><div class="cmp-strong">“When the AM‑PAC fell from 21 to 16, that was the point to revise the discharge estimate and tell case management, not after a third score confirmed it.”</div><div class="cmp-r">Systems lesson</div><div class="cmp-weak">“Discharge planning started too late.”</div><div class="cmp-strong">“Nothing in our workflow links a declining 6‑Clicks score to a disposition review, so the update depended on individual judgment.”</div><div class="cmp-r">Action</div><div class="cmp-weak">“We should communicate better with case management.”</div><div class="cmp-strong">“The presenting therapist and unit lead will propose a score-change threshold that triggers an updated recommendation to case management, and bring it to the next session.”</div></div></div></section>
+
+<section class="section refs" id="s11" data-nav="11" data-title="References"><div class="sec-meta"><span class="sec-num">References</span></div><div class="sec-title">References</div><div class="refs-block"><div class="refs-block-label">Clinical reasoning</div><ul class="ref-list"><li><span>1.</span>Edwards I, Jones M, Carr J, Braunack-Mayer A, Jensen GM. Clinical reasoning strategies in physical therapy. <i>Phys Ther</i>. 2004;84(4):312-330.</li><li><span>2.</span>Edwards I, Braunack-Mayer A, Jones M. Ethical reasoning as a clinical-reasoning strategy in physiotherapy. <i>Physiotherapy</i>. 2005;91(4):229-236.</li><li><span>3.</span>Jensen GM, Gwyer J, Shepard KF, Hack LM. Expert practice in physical therapy. <i>Phys Ther</i>. 2000;80(1):28-43.</li><li><span>4.</span>Huhn K, Gilliland SJ, Black LL, Wainwright SF, Christensen N. Clinical reasoning in physical therapy: a concept analysis. <i>Phys Ther</i>. 2019;99(4):440-456.</li><li><span>5.</span>Smith M, Higgs J, Ellis E. Characteristics and processes of physiotherapy clinical decision making: a study of acute care cardiorespiratory physiotherapy. <i>Physiother Res Int</i>. 2008;13(4):209-222.</li><li><span>6.</span>Croskerry P. A universal model of diagnostic reasoning. <i>Acad Med</i>. 2009;84(8):1022-1028.</li></ul></div><div class="refs-block"><div class="refs-block-label">Case structure &amp; evidence</div><ul class="ref-list"><li><span>7.</span>APTA Guide to Physical Therapist Practice 4.0. American Physical Therapy Association; 2023.</li><li><span>8.</span>World Health Organization. <i>International Classification of Functioning, Disability and Health: ICF</i>. WHO; 2001.</li><li><span>9.</span>Atkinson HL, Nixon-Cave K. A tool for clinical reasoning and reflection using the International Classification of Functioning, Disability and Health (ICF) framework and patient management model. <i>Phys Ther</i>. 2011;91(3):416-430.</li><li><span>10.</span>Davenport TE. Clinical case reporting in the peer-reviewed physical therapy literature: time to move toward functioning. <i>Physiother Res Int</i>. 2015;20(4):220-230.</li><li><span>11.</span>Sackett DL, Rosenberg WM, Gray JA, Haynes RB, Richardson WS. Evidence based medicine: what it is and what it isn't. <i>BMJ</i>. 1996;312(7023):71-72.</li></ul></div><div class="refs-block"><div class="refs-block-label">Discussion structure &amp; safety culture</div><ul class="ref-list"><li><span>12.</span>Giesbrecht V, Au S. Morbidity and mortality conferences: a narrative review of strategies to prioritize quality improvement. <i>Jt Comm J Qual Patient Saf</i>. 2016;42(11):516-527.</li><li><span>13.</span>Brook K, Agarwala AV, Tewfik GL. Reframing the morbidity and mortality conference: the impact of a just culture. <i>J Patient Saf</i>. 2024;20(4):280-287.</li><li><span>14.</span>Lai B, Horn J, Wilkinson J, Garrison GM. Using morbidity and mortality conferences to drive quality improvement and reduce errors. <i>Fam Pract Manag</i>. 2023;30(2):13-17.</li><li><span>15.</span>Edmondson A. Psychological safety and learning behavior in work teams. <i>Adm Sci Q</i>. 1999;44(2):350-383.</li><li><span>16.</span>Hollnagel E, Wears RL, Braithwaite J. <i>From Safety-I to Safety-II: A White Paper</i>. Resilient Health Care Net; 2015.</li></ul></div></section>
+</main>
+</div>
+<div class="overlay" id="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="ovName">
+<div class="ov-top"><span class="ov-count">Section 04<b id="ovCount"></b></span><button type="button" class="ov-close" id="ovClose">Close</button></div>
+<div><span class="dtype" id="ovType"></span></div>
+<div class="ov-name" id="ovName"></div><div class="ov-desc" id="ovDesc"></div><div class="ov-q" id="ovQ"></div>
+<div class="ov-row"><span class="ov-label">Clinical vignette</span><span class="ov-val" id="ovV"></span></div>
+<div class="ov-row"><span class="ov-label">Common pitfall</span><span class="ov-val pit" id="ovP"></span></div>
+<div class="ov-hint">← → other domains · Esc to return</div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+
+'use strict';
+const domains = [
+  {
+    name: "Diagnostic reasoning",
+    desc: "Generating, testing, and revising hypotheses.",
+    type: "Missed opportunity",
+    q: "“What were you ruling in or out, and what changed your thinking?”",
+    vignette: "A 66-year-old man is recovering from open abdominal aortic surgery, complicated by an infected retroperitoneal collection requiring washout and debridement. A retroperitoneal process of this kind raises concern for femoral nerve compression. The initial evaluation records bilateral lower-extremity strength as at least 3/5, assessed during functional mobility, although the patient cannot stand.",
+    pitfall: "Screening strength globally during functional tasks, when the history points to a focal nerve injury, can miss specific impairments and misdirect treatment."
+  },
+  {
+    name: "Procedural reasoning",
+    desc: "Selecting, dosing, and progressing interventions.",
+    type: "Missed opportunity",
+    q: "“How did you choose among interventions, and how did the patient's response change your approach?”",
+    vignette: "A man recovering from abdominal aortic surgery has a left femoral nerve injury with focal weakness. Early sessions consist of one or two total-assist standing trials, with no intervention targeting the specific impairment.",
+    pitfall: "Pursuing a mobility milestone without addressing the underlying impairment, or adjusting volume and intensity to it, can lead to undertreatment."
+  },
+  {
+    name: "Interactive reasoning",
+    desc: "Communicating with the patient and the care team.",
+    type: "Missed opportunity",
+    q: "“What did you bring to your communication with the care team, and how did it shape the plan of care?”",
+    vignette: "A 70-year-old man is on high-flow nasal cannula after a respiratory decompensation. Before the session, the therapist messages the nurse: “Hi, how is the patient doing? Hoping to come by at 11.” The nurse replies, “He’s fine.” Overnight, his flow and FiO2 were increased and a repeat ABG was drawn, but the therapist does not review the settings or the result, and mobilizes him on the strength of the nurse’s one-line reply.",
+    pitfall: "Communicating without bringing your own clinical reasoning, such as asking open-ended questions that hand the decision to someone else, leaves you with information you cannot interpret and a plan you did not make."
+  },
+  {
+    name: "Collaborative reasoning",
+    desc: "Understanding the patient's perspective and deciding together.",
+    type: "Exemplar",
+    q: "“What mattered most to the patient, and how were decisions made together?”",
+    vignette: "A 44-year-old woman is recovering from a lung transplant, with a course complicated by demyelinating polyneuropathy. She is making steady progress with leg press strengthening on the Moveo but has not reached 50% of body weight on a one-repetition maximum (1RM), the strength the therapist anticipates she needs to stand. She repeatedly asks to attempt standing, although success is unlikely. The therapist and patient agree to try at the next session, with adequate assistance and equipment in place, and a shared plan to return to Moveo strengthening if it is unsuccessful.",
+    pitfall: "Not sharing decision-making power with the patient can reduce buy-in and limit open participation in care."
+  },
+  {
+    name: "Predictive reasoning",
+    desc: "Anticipating prognosis and revising it as the picture changes.",
+    type: "Exemplar",
+    q: "“What was your initial estimate of the likely outcome, and what was it based on? Which findings shifted it, and how did you act on the change?”",
+    vignette: "A 72-year-old man who lives alone is admitted to a general medical unit. At evaluation his AM‑PAC 6‑Clicks score is 21; given his independent baseline, the therapist judges home discharge likely, while noting that his age and living alone temper that estimate. Over three days his stay is extended and his score falls to 16. Weighing the trend rather than any single score, the therapist revises the estimate toward subacute rehabilitation, tells case management that day, and names what would shift it back: a return toward baseline and independent transfers. When his score reaches 13 near discharge, the referral is already in place.",
+    pitfall: "Treating prediction as a one-time decision. Predictive reasoning means updating an initial estimate as new evidence changes its likelihood, rather than waiting until the original prediction is clearly wrong."
+  },
+  {
+    name: "Ethical reasoning",
+    desc: "Value conflicts and goals-of-care tensions; relevant across all domains.",
+    type: "Open case",
+    q: "“Where did your judgment conflict with patient or family wishes, team priorities, or institutional pressures, and how did you respond?”",
+    vignette: "An 82-year-old man with Parkinson disease presents to the ED after multiple falls and a urinary tract infection. This is his third hospital presentation in a month, each followed by discharge home. His wife, also in her 80s and using a rollator, is his primary caregiver, with home care three days a week. She says that supporting him is increasingly difficult, but that she promised he would never go to a skilled nursing facility. He says he wants to go home; his cognition has fluctuated during this admission. The therapist is asked for a discharge recommendation.",
+    pitfall: "Applying rules or professional codes without regard to the patient's circumstances, or acting on personal values that have not been examined and may reflect one's own biases."
+  }
+];
+const root = document.documentElement;
+const container = document.getElementById('scrollContainer');
+const sections = Array.from(document.querySelectorAll('.section'));
+const sidebarItems = Array.from(document.querySelectorAll('.sidebar-item'));
+const headerTitle = document.getElementById('headerTitle');
+const headerProgress = document.getElementById('headerProgress');
+const modeBtn = document.getElementById('modeBtn');
+const notesBtn = document.getElementById('notesBtn');
+const overlay = document.getElementById('overlay');
+const toast = document.getElementById('toast');
+const layout = document.querySelector('.layout');
+const header = document.querySelector('.site-header');
+let currentSec = sections[0];
+let spot = -1;
+let lockUntil = 0;
+let ovIndex = -1;
+let toastTimer;
+let returnFocus = null;
+const isPresent = () => root.classList.contains('present');
+const visible = () => sections.filter(s => getComputedStyle(s).display !== 'none');
+const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* Domain grid */
+const grid = document.getElementById('domainGrid');
+domains.forEach((d, i) => {
+  const cell = document.createElement('div');
+  cell.className = 'domain-cell';
+  cell.innerHTML = `
+    <button type="button" class="domain-head" aria-expanded="false" aria-controls="domainPanel${i}">
+      <span class="domain-left">
+        <span class="domain-name">${d.name}</span>
+        <span class="domain-desc">${d.desc}</span>
+      </span>
+      <svg class="domain-chevron" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2,4 7,10 12,4"/></svg>
+    </button>
+    <div class="domain-expand" id="domainPanel${i}">
+      <span class="dtype">${d.type}</span>
+      <div class="expand-section-label">Discussion prompt</div>
+      <div class="expand-q">${d.q}</div>
+      <div class="expand-body-label">Clinical vignette</div>
+      <div class="vignette">${d.vignette}</div>
+      <div class="expand-body-label">Common pitfall</div>
+      <div class="pitfall-text">${d.pitfall}</div>
+    </div>`;
+  cell.querySelector('.domain-head').addEventListener('click', () => {
+    if (isPresent()) { openOverlay(i); return; }
+    const wasOpen = cell.classList.contains('open');
+    collapseDomains();
+    if (!wasOpen) {
+      cell.classList.add('open');
+      cell.querySelector('.domain-head').setAttribute('aria-expanded', 'true');
+    }
+  });
+  grid.appendChild(cell);
+});
+function collapseDomains() {
+  document.querySelectorAll('.domain-cell').forEach(c => {
+    c.classList.remove('open');
+    c.querySelector('.domain-head').setAttribute('aria-expanded', 'false');
+  });
+}
+
+/* Domain focus overlay */
+function openOverlay(i) {
+  const wasHidden = overlay.hidden;
+  if (wasHidden) returnFocus = document.activeElement;
+  ovIndex = i;
+  const d = domains[i];
+  document.getElementById('ovCount').textContent = `Domain ${i + 1} of ${domains.length}`;
+  document.getElementById('ovType').textContent = d.type;
+  document.getElementById('ovName').textContent = d.name;
+  document.getElementById('ovDesc').textContent = d.desc;
+  document.getElementById('ovQ').textContent = d.q;
+  document.getElementById('ovV').textContent = d.vignette;
+  document.getElementById('ovP').textContent = d.pitfall;
+  overlay.hidden = false;
+  layout.inert = true;
+  header.inert = true;
+  overlay.scrollTop = 0;
+  if (wasHidden) document.getElementById('ovClose').focus({preventScroll: true});
+}
+function closeOverlay() {
+  const wasOpen = !overlay.hidden;
+  overlay.hidden = true;
+  layout.inert = false;
+  header.inert = false;
+  ovIndex = -1;
+  if (wasOpen && returnFocus && returnFocus.isConnected) returnFocus.focus({preventScroll: true});
+  returnFocus = null;
+}
+document.getElementById('ovClose').addEventListener('click', closeOverlay);
+
+/* Navigation */
+function updateChrome() {
+  const vis = visible();
+  headerTitle.textContent = currentSec.dataset.title;
+  headerProgress.textContent = `${vis.indexOf(currentSec) + 1} / ${vis.length}`;
+  sidebarItems.forEach(el => {
+    const active = el.dataset.nav === currentSec.dataset.nav;
+    el.classList.toggle('active', active);
+    if (active) el.setAttribute('aria-current', 'location');
+    else el.removeAttribute('aria-current');
+  });
+}
+function renderSpot(sec) {
+  sec.classList.toggle('spotting', spot >= 0);
+  sec.querySelectorAll('.spot').forEach((el, k) => el.classList.toggle('lit', k === spot));
+}
+function setCurrent(sec) {
+  if (!sec) return;
+  if (sec !== currentSec) { spot = -1; renderSpot(currentSec); currentSec = sec; }
+  updateChrome();
+}
+function goTo(sec, smooth = true) {
+  if (!sec) return;
+  const animate = smooth && !reducedMotion();
+  lockUntil = Date.now() + (animate ? 800 : 0);
+  setCurrent(sec);
+  container.scrollTo({top: sec.offsetTop, behavior: animate ? 'smooth' : 'instant'});
+}
+function sectionAtScroll() {
+  const y = container.scrollTop + container.clientHeight * 0.35;
+  let cur = null;
+  visible().forEach(s => { if (!cur || s.offsetTop <= y) cur = s; });
+  return cur;
+}
+let settleTimer;
+container.addEventListener('scroll', () => {
+  clearTimeout(settleTimer);
+  const wait = lockUntil - Date.now();
+  if (wait > 0) { settleTimer = setTimeout(() => setCurrent(sectionAtScroll()), wait + 50); return; }
+  setCurrent(sectionAtScroll());
+}, {passive: true});
+function trySpot(dir) {
+  if (!isPresent() || !currentSec.hasAttribute('data-spotlight')) return false;
+  const n = currentSec.querySelectorAll('.spot').length;
+  if (dir > 0 && spot < n - 1) { spot++; renderSpot(currentSec); return true; }
+  if (dir < 0 && spot > -1) { spot--; renderSpot(currentSec); return true; }
+  return false;
+}
+function step(dir) {
+  if (trySpot(dir)) return;
+  const vis = visible();
+  const target = vis[vis.indexOf(currentSec) + dir];
+  if (target) goTo(target);
+}
+document.querySelectorAll('[data-spotlight]').forEach(sec => {
+  sec.querySelectorAll('.spot').forEach((el, k) => el.addEventListener('click', () => {
+    if (!isPresent()) return;
+    const same = sec === currentSec;
+    if (!same) goTo(sec);
+    spot = (same && spot === k) ? -1 : k;
+    renderSpot(sec);
+  }));
+});
+sidebarItems.forEach(item => item.addEventListener('click', e => {
+  e.preventDefault();
+  goTo(sections.find(s => s.dataset.nav === item.dataset.nav));
+}));
+
+/* Presentation and facilitator notes */
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+}
+function setPresent(on) {
+  closeOverlay();
+  collapseDomains();
+  spot = -1;
+  renderSpot(currentSec);
+  root.classList.toggle('present', on);
+  root.classList.remove('show-notes');
+  notesBtn.classList.remove('on');
+  notesBtn.setAttribute('aria-pressed', 'false');
+  modeBtn.textContent = on ? 'Exit' : 'Present';
+  modeBtn.classList.toggle('on', on);
+  modeBtn.setAttribute('aria-pressed', String(on));
+  requestAnimationFrame(() => {
+    let s = currentSec;
+    if (getComputedStyle(s).display === 'none') { const v = visible(); s = v[v.length - 1]; }
+    goTo(s, false);
+  });
+  if (on) showToast('Presentation mode · arrows or clicker to advance · N for notes · Esc to exit');
+}
+function toggleNotes() {
+  if (!isPresent()) return;
+  const on = root.classList.toggle('show-notes');
+  notesBtn.classList.toggle('on', on);
+  notesBtn.setAttribute('aria-pressed', String(on));
+  requestAnimationFrame(() => goTo(currentSec, false));
+}
+modeBtn.addEventListener('click', () => { setPresent(!isPresent()); modeBtn.blur(); });
+notesBtn.addEventListener('click', () => { toggleNotes(); notesBtn.blur(); });
+
+/* Keyboard and clicker */
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key;
+  if (!overlay.hidden) {
+    if (k === 'Tab') { e.preventDefault(); document.getElementById('ovClose').focus(); return; }
+    if (k === 'Escape') { e.preventDefault(); closeOverlay(); return; }
+    const fwd = ['ArrowDown','ArrowRight','PageDown'].includes(k) || (k === ' ' && !e.shiftKey);
+    const back = ['ArrowUp','ArrowLeft','PageUp'].includes(k) || (k === ' ' && e.shiftKey);
+    if (fwd) { e.preventDefault(); if (ovIndex < domains.length - 1) openOverlay(ovIndex + 1); }
+    else if (back) { e.preventDefault(); if (ovIndex > 0) openOverlay(ovIndex - 1); }
+    return;
+  }
+  if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+  if (k === 'p' || k === 'P') { e.preventDefault(); setPresent(!isPresent()); return; }
+  if ((k === 'n' || k === 'N') && isPresent()) { e.preventDefault(); toggleNotes(); return; }
+  if (k === 'Escape' && isPresent()) { e.preventDefault(); setPresent(false); return; }
+  if (k === ' ' && e.target instanceof Element && e.target.closest('button, a')) return;
+  const fwd = ['ArrowDown','ArrowRight','PageDown'].includes(k) || (k === ' ' && !e.shiftKey);
+  const back = ['ArrowUp','ArrowLeft','PageUp'].includes(k) || (k === ' ' && e.shiftKey);
+  if (fwd) { e.preventDefault(); step(1); }
+  else if (back) { e.preventDefault(); step(-1); }
+});
+window.addEventListener('resize', () => requestAnimationFrame(() => goTo(currentSec, false)));
+updateChrome();
+
+</script>
+</body>
+</html>
