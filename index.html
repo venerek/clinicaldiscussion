@@ -229,6 +229,93 @@ html.present .section.refs { display: none; }
   *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
 }
 
+
+/* Reading and live-facilitation improvements */
+.scroll-container { scroll-snap-type: y mandatory; }
+.section { scroll-snap-align: start; scroll-snap-stop: always; }
+html.present .scroll-container { scroll-snap-type: y mandatory; height: calc(100vh - 6rem); }
+html.present .section { scroll-snap-align: start; scroll-snap-stop: always; min-height: calc(100vh - 6rem); }
+html:not(.present) :is(.field-value,.step-body,.icf-body,.mod-rationale,.domain-desc,.expand-q,.vignette,.pitfall-text,.tl-q,.pil-q,.gap-mid,.item-list li,.refl > div,.cmp > div,.cmp.three .cmp-weak,.cmp.three .cmp-strong,.sec-note,.cover .cover-sub,.cover .framing-note,.ov-desc,.ov-val) { font-size: 1rem; line-height: 1.6; }
+html:not(.present) :is(.sec-num,.sec-category,.field-label,.col-label,.step-label,.icf-label,.mod-label,.domain-name,.expand-section-label,.expand-body-label,.dtype,.ov-label,.ov-count,.gap-end,.refs-block-label,.cmp .cmp-h,.cmp .cmp-r,.sidebar-group-label,.sidebar-item .s-num,.sidebar-item .s-title) { font-size: .8125rem; }
+html:not(.present) .mod-val { font-size: 1.0625rem; }
+html:not(.present) .cite, html:not(.present) .ref-list li { font-size: .8125rem; }
+html:not(.present) .gap-mid small { font-size: .875rem; }
+html.present .spotting .spot { opacity: .5; }
+html.present .spotting .spot.lit { opacity: 1; }
+.utility-btn,.nav-control,.jump-select { font: 700 .8125rem Arial,Helvetica,sans-serif; border: 1px solid var(--nyp-neutral-dark); border-radius: 3px; background: #fff; color: #000; padding: .55rem .75rem; min-height: 40px; cursor: pointer; }
+.utility-btn { font-size: .6875rem; padding: .25rem .5rem; min-height: 30px; }
+.site-header .utility-btn { color: #fff; background: #000; border-color: #97999B; }
+.nav-control:disabled { opacity: .4; cursor: default; }
+.utility-btn[aria-pressed="true"] { border-color: var(--nyp-red); }
+.jump-wrap { display: none; position: fixed; top: 2.5rem; left: 0; right: 0; z-index: 80; padding: .5rem .75rem; background: #fff; border-bottom: 1px solid var(--border); align-items: center; gap: .65rem; }
+.jump-wrap label { font-size: .8125rem; font-weight: 700; white-space: nowrap; }
+.jump-select { width: 100%; min-width: 0; font-weight: 400; }
+.presentation-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 3.5rem; z-index: 100; align-items: center; justify-content: space-between; gap: .75rem; padding: .4rem 1rem; background: #fff; border-top: 1px solid var(--border); }
+html.present .presentation-nav { display: flex; }
+.nav-center { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+.nav-status { font-size: .75rem; color: #333; text-align: center; }
+.progress-track { width: 7rem; height: 4px; background: var(--nyp-gray); }
+.progress-fill { display: block; height: 100%; background: var(--nyp-red); width: 0; }
+.overlay { bottom: 0; }
+.domain-navigation { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: 1rem; }
+.domain-position { font-size: .8125rem; }
+.help-dialog { width: min(34rem,calc(100vw - 2rem)); max-height: calc(100vh - 3rem); overflow: auto; margin: auto; padding: 1.5rem; border: 1px solid #63666A; background: #fff; color: #000; font: 1rem/1.5 Arial,Helvetica,sans-serif; }
+.help-dialog::backdrop { background: rgba(0,0,0,.55); }
+.help-dialog h2 { font-size: 1.4rem; margin-bottom: 1rem; }
+.help-dialog dl { display: grid; grid-template-columns: 9rem 1fr; gap: .65rem 1rem; margin-bottom: 1rem; }
+.help-dialog dt { font-weight: 700; }
+.help-dialog p { margin-bottom: 1rem; }
+@media (max-width: 900px) {
+ html:not(.present) .jump-wrap { display: flex; }
+ html:not(.present) .layout { padding-top: 6rem; }
+ html:not(.present) .scroll-container { height: calc(100vh - 6rem); }
+ html:not(.present) .section { min-height: calc(100vh - 6rem); }
+ .site-header .doc-title,.site-header .sep { display: none; }
+ .progress-track { display: none; }
+}
+@media (max-width: 600px) {
+ .site-header { gap: .35rem; }
+ .site-header .current-section { flex: 1; }
+ .site-header .progress { display: none; }
+ .site-header .utility-btn { font-size: .6rem; padding: .2rem .35rem; }
+ .presentation-nav { padding: .35rem .5rem; gap: .35rem; }
+ .nav-center { gap: .35rem; }
+ .nav-status { font-size: .65rem; }
+ .nav-control { font-size: .75rem; padding: .45rem .5rem; }
+ .help-dialog dl { grid-template-columns: 1fr; gap: .25rem; }
+ .help-dialog dd { margin-bottom: .6rem; }
+}
+@media print {
+ @page { margin: 18mm; }
+ html,html.present { font-size: 11pt !important; }
+ body { overflow: visible !important; height: auto !important; width: auto !important; background: #fff !important; color: #000 !important; }
+ .site-header,.sidebar,.jump-wrap,.presentation-nav,.overlay,.toast,.help-dialog,.domain-chevron { display: none !important; }
+ .layout { display: block !important; height: auto !important; padding: 0 !important; }
+ .scroll-container,html.present .scroll-container { display: block !important; height: auto !important; overflow: visible !important; scroll-snap-type: none !important; }
+ .section,html.present .section,html.present .section.refs { display: block !important; min-height: 0 !important; height: auto !important; padding: 0 0 1rem !important; margin-bottom: 1rem; background: #fff !important; break-before: page; border: none; }
+ .section:first-child { break-before: auto; }
+ .section.cover { padding-top: 2rem !important; }
+ .sec-title,html.present .sec-title { font-size: 22pt !important; }
+ .cover .sec-title,html.present .cover .sec-title { font-size: 32pt !important; }
+ .domain-grid { display: block !important; border: none; }
+ .domain-cell { border: 1px solid #aaa; margin-bottom: 1rem; break-inside: avoid; }
+ .domain-head { display: block; cursor: default; padding: .75rem; box-shadow: none !important; }
+ .domain-expand { display: block !important; }
+ html.present .fac,html.present .cite { display: block !important; }
+ .spot { opacity: 1 !important; box-shadow: none !important; }
+ .cmp-wrap { overflow: visible; }
+ .cmp,.cmp.three { min-width: 0; }
+ .step-grid,.icf-grid,html.present .step-grid,html.present .icf-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+ .three-grid,.mod-grid,.two-col,.tl,.pil,.refl { grid-template-columns: 1fr; gap: .75rem; }
+ .tl-rail { display: none; }
+ .tl-stage + .tl-stage,.pil > div + div,.refl > div + div { border-left: none; padding-left: 0; }
+ .sec-meta,.sec-title,.domain-head,.refs-block-label { break-after: avoid; }
+ .field-row,.step-box,.three-box,.icf-cell,.mod-cell,.ref-list li { break-inside: avoid; }
+ .cite { margin-top: 1rem; }
+ :is(.field-value,.step-body,.icf-body,.mod-rationale,.domain-desc,.expand-q,.vignette,.pitfall-text,.tl-q,.pil-q,.gap-mid,.item-list li,.refl > div,.cmp > div,.cmp.three .cmp-weak,.cmp.three .cmp-strong,.sec-note,.cover .cover-sub,.cover .framing-note) { font-size: 11pt !important; line-height: 1.45 !important; }
+ :is(.sec-num,.sec-category,.field-label,.col-label,.step-label,.icf-label,.mod-label,.domain-name,.expand-section-label,.expand-body-label,.dtype,.gap-end,.refs-block-label,.cmp .cmp-h,.cmp .cmp-r,.cite,.ref-list li) { font-size: 9pt !important; }
+}
+
 </style>
 </head>
 <body>
@@ -238,7 +325,8 @@ html.present .section.refs { display: none; }
 <span class="progress" id="headerProgress"></span>
 <button type="button" class="hdr-btn notes-btn" id="notesBtn" aria-pressed="false" title="Show or hide facilitator notes (N)">Notes</button>
 <button type="button" class="hdr-btn" id="modeBtn" aria-pressed="false" title="Toggle presentation mode (P)">Present</button>
-</header>
+<button type="button" class="utility-btn" id="helpBtn" aria-haspopup="dialog" aria-controls="helpDialog">Help</button><button type="button" class="utility-btn" id="printBtn" title="Print a complete handout">Print</button></header>
+<div class="jump-wrap"><label for="sectionJump">Jump to section</label><select class="jump-select" id="sectionJump"><option value="s0">Clinical Discussion Guideline</option><option value="s1">Case selection &amp; preparation</option><option value="s2">Opening the discussion</option><option value="s3">Patient &amp; clinical context</option><option value="s3b">ICF examination snapshot</option><option value="s4">Clinical reasoning domains</option><option value="s5">Navigating complexity &amp; uncertainty</option><option value="s6">Plan of care</option><option value="s7">Outcome review</option><option value="s8">Evidence integration</option><option value="s9">Moderator prompts</option><option value="s10">Closing &amp; action items</option><option value="s10b">Weaker and stronger closes</option><option value="s11">References</option></select></div>
 <div class="layout">
 <nav class="sidebar" aria-label="Section navigation">
 <div class="sidebar-group-label">Contents</div>
@@ -295,7 +383,13 @@ html.present .section.refs { display: none; }
 <div class="ov-name" id="ovName"></div><div class="ov-desc" id="ovDesc"></div><div class="ov-q" id="ovQ"></div>
 <div class="ov-row"><span class="ov-label">Clinical vignette</span><span class="ov-val" id="ovV"></span></div>
 <div class="ov-row"><span class="ov-label">Common pitfall</span><span class="ov-val pit" id="ovP"></span></div>
-<div class="ov-hint">← → other domains · Esc to return</div></div>
+<nav class="domain-navigation" aria-label="Domain navigation"><button type="button" class="nav-control" id="previousDomain">Previous domain</button><span class="domain-position" id="domainPosition" aria-live="polite"></span><button type="button" class="nav-control" id="nextDomain">Next domain</button></nav><div class="ov-hint">← → other domains · Esc to return</div></div>
+<nav class="presentation-nav" aria-label="Presentation controls">
+<button type="button" class="nav-control" id="previousSection">Previous</button>
+<div class="nav-center"><span class="nav-status" id="navStatus" aria-live="polite"></span><div class="progress-track" role="progressbar" aria-label="Section progress" aria-valuemin="1" aria-valuemax="13" aria-valuenow="1" id="sectionProgress"><span class="progress-fill" id="progressFill"></span></div><button type="button" class="utility-btn" id="spotlightBtn" aria-pressed="true">Spotlight on</button></div>
+<button type="button" class="nav-control" id="nextSection">Next</button></nav>
+<dialog class="help-dialog" id="helpDialog" aria-labelledby="helpTitle"><h2 id="helpTitle">Navigation and presentation help</h2><p>Reading and presentation modes snap between sections. Use the visible Previous and Next buttons or these shortcuts.</p><dl><dt>P</dt><dd>Enter or exit presentation mode</dd><dt>N</dt><dd>Show or hide existing notes in presentation mode</dd><dt>Right / Down / Page Down</dt><dd>Advance a prompt or section</dd><dt>Left / Up / Page Up</dt><dd>Go back a prompt or section</dd><dt>Space / Shift+Space</dt><dd>Advance / go back when a button is not focused</dd><dt>Escape</dt><dd>Close a domain, close help, or exit presentation mode</dd><dt>Spotlight</dt><dd>Turn prompt highlighting on or off; unselected prompts remain at 50% opacity</dd></dl><p>In a domain view, use Previous domain and Next domain, or the arrow keys. Print produces a complete handout with expanded vignettes and references.</p><form method="dialog"><button class="nav-control">Close help</button></form></dialog>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 
@@ -368,6 +462,7 @@ let lockUntil = 0;
 let ovIndex = -1;
 let toastTimer;
 let returnFocus = null;
+let spotlightEnabled = true;
 const isPresent = () => root.classList.contains('present');
 const visible = () => sections.filter(s => getComputedStyle(s).display !== 'none');
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -425,9 +520,14 @@ function openOverlay(i) {
   document.getElementById('ovQ').textContent = d.q;
   document.getElementById('ovV').textContent = d.vignette;
   document.getElementById('ovP').textContent = d.pitfall;
+  document.getElementById('previousDomain').disabled = i === 0;
+  document.getElementById('nextDomain').disabled = i === domains.length - 1;
+  document.getElementById('domainPosition').textContent = `${i + 1} / ${domains.length}`;
   overlay.hidden = false;
   layout.inert = true;
   header.inert = true;
+  document.querySelector('.presentation-nav').inert = true;
+  document.querySelector('.jump-wrap').inert = true;
   overlay.scrollTop = 0;
   if (wasHidden) document.getElementById('ovClose').focus({preventScroll: true});
 }
@@ -436,6 +536,8 @@ function closeOverlay() {
   overlay.hidden = true;
   layout.inert = false;
   header.inert = false;
+  document.querySelector('.presentation-nav').inert = false;
+  document.querySelector('.jump-wrap').inert = false;
   ovIndex = -1;
   if (wasOpen && returnFocus && returnFocus.isConnected) returnFocus.focus({preventScroll: true});
   returnFocus = null;
@@ -447,6 +549,7 @@ function updateChrome() {
   const vis = visible();
   headerTitle.textContent = currentSec.dataset.title;
   headerProgress.textContent = `${vis.indexOf(currentSec) + 1} / ${vis.length}`;
+  updateNavigationControls(vis);
   sidebarItems.forEach(el => {
     const active = el.dataset.nav === currentSec.dataset.nav;
     el.classList.toggle('active', active);
@@ -455,8 +558,9 @@ function updateChrome() {
   });
 }
 function renderSpot(sec) {
-  sec.classList.toggle('spotting', spot >= 0);
-  sec.querySelectorAll('.spot').forEach((el, k) => el.classList.toggle('lit', k === spot));
+  sec.classList.toggle('spotting', spotlightEnabled && spot >= 0);
+  sec.querySelectorAll('.spot').forEach((el, k) => el.classList.toggle('lit', spotlightEnabled && k === spot));
+  updateNavigationControls(visible());
 }
 function setCurrent(sec) {
   if (!sec) return;
@@ -484,7 +588,7 @@ container.addEventListener('scroll', () => {
   setCurrent(sectionAtScroll());
 }, {passive: true});
 function trySpot(dir) {
-  if (!isPresent() || !currentSec.hasAttribute('data-spotlight')) return false;
+  if (!spotlightEnabled || !isPresent() || !currentSec.hasAttribute('data-spotlight')) return false;
   const n = currentSec.querySelectorAll('.spot').length;
   if (dir > 0 && spot < n - 1) { spot++; renderSpot(currentSec); return true; }
   if (dir < 0 && spot > -1) { spot--; renderSpot(currentSec); return true; }
@@ -498,7 +602,7 @@ function step(dir) {
 }
 document.querySelectorAll('[data-spotlight]').forEach(sec => {
   sec.querySelectorAll('.spot').forEach((el, k) => el.addEventListener('click', () => {
-    if (!isPresent()) return;
+    if (!isPresent() || !spotlightEnabled) return;
     const same = sec === currentSec;
     if (!same) goTo(sec);
     spot = (same && spot === k) ? -1 : k;
@@ -550,8 +654,16 @@ notesBtn.addEventListener('click', () => { toggleNotes(); notesBtn.blur(); });
 document.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const k = e.key;
+  if (document.getElementById('helpDialog').open) return;
   if (!overlay.hidden) {
-    if (k === 'Tab') { e.preventDefault(); document.getElementById('ovClose').focus(); return; }
+    if (k === 'Tab') {
+      const buttons = Array.from(overlay.querySelectorAll('button:not(:disabled)'));
+      const first = buttons[0], last = buttons[buttons.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      return;
+    }
+    if (k === ' ' && e.target instanceof Element && e.target.closest('button')) return;
     if (k === 'Escape') { e.preventDefault(); closeOverlay(); return; }
     const fwd = ['ArrowDown','ArrowRight','PageDown'].includes(k) || (k === ' ' && !e.shiftKey);
     const back = ['ArrowUp','ArrowLeft','PageUp'].includes(k) || (k === ' ' && e.shiftKey);
@@ -569,6 +681,38 @@ document.addEventListener('keydown', e => {
   if (fwd) { e.preventDefault(); step(1); }
   else if (back) { e.preventDefault(); step(-1); }
 });
+
+/* Visible controls and mobile section picker */
+function updateNavigationControls(vis) {
+  const index = vis.indexOf(currentSec);
+  const promptCount = currentSec.querySelectorAll('.spot').length;
+  const hasPrompts = spotlightEnabled && isPresent() && currentSec.hasAttribute('data-spotlight');
+  document.getElementById('previousSection').disabled = index === 0 && (!hasPrompts || spot < 0);
+  document.getElementById('nextSection').disabled = index === vis.length - 1 && (!hasPrompts || spot >= promptCount - 1);
+  document.getElementById('navStatus').textContent = `Section ${index + 1} of ${vis.length}` + (hasPrompts && spot >= 0 ? ` · Prompt ${spot + 1}/${promptCount}` : '');
+  document.getElementById('progressFill').style.width = `${((index + 1) / vis.length) * 100}%`;
+  const progress = document.getElementById('sectionProgress');
+  progress.setAttribute('aria-valuemax', String(vis.length));
+  progress.setAttribute('aria-valuenow', String(index + 1));
+  document.getElementById('sectionJump').value = currentSec.id;
+}
+document.getElementById('previousSection').addEventListener('click', () => { step(-1); updateChrome(); });
+document.getElementById('nextSection').addEventListener('click', () => { step(1); updateChrome(); });
+document.getElementById('previousDomain').addEventListener('click', () => { if (ovIndex > 0) openOverlay(ovIndex - 1); });
+document.getElementById('nextDomain').addEventListener('click', () => { if (ovIndex < domains.length - 1) openOverlay(ovIndex + 1); });
+document.getElementById('sectionJump').addEventListener('change', e => goTo(document.getElementById(e.target.value)));
+document.getElementById('spotlightBtn').addEventListener('click', e => {
+  spotlightEnabled = !spotlightEnabled;
+  spot = -1;
+  renderSpot(currentSec);
+  e.currentTarget.setAttribute('aria-pressed', String(spotlightEnabled));
+  e.currentTarget.textContent = spotlightEnabled ? 'Spotlight on' : 'Spotlight off';
+  updateChrome();
+});
+document.getElementById('helpBtn').addEventListener('click', () => document.getElementById('helpDialog').showModal());
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+window.addEventListener('afterprint', () => requestAnimationFrame(() => goTo(currentSec, false)));
+
 window.addEventListener('resize', () => requestAnimationFrame(() => goTo(currentSec, false)));
 updateChrome();
 
